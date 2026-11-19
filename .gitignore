@@ -37,3 +37,22 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Bancos e dados sensíveis ###
+*.db
+*.sqlite
+*.sqlite3
+*.bak
+*.backup
+*.log
+*.tmp
+
+### Artefatos compilados ###
+*.class
+*.jar
+*.war
+*.ear
+
+### Maven local ###
+apache-maven-*/
+apache-maven-*.zip
