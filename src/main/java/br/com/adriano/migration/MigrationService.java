@@ -292,6 +292,7 @@ public final class MigrationService {
         adicionarColunaSeNaoExiste(conn, "vendas", "cancelamento_data", "TEXT");
         adicionarColunaSeNaoExiste(conn, "vendas", "cancelamento_usuario_id", "INTEGER");
         adicionarColunaSeNaoExiste(conn, "vendas", "numero", "INTEGER");
+        adicionarColunaSeNaoExiste(conn, "vendas", "caixa_id", "INTEGER");
 
         // 2b. Estender tabela itens_venda
         adicionarColunaSeNaoExiste(conn, "itens_venda", "preco_total", "REAL NOT NULL DEFAULT 0");

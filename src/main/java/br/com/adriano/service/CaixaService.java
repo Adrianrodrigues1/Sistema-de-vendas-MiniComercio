@@ -201,7 +201,13 @@ public final class CaixaService {
     }
 
     public List<MovimentoCaixa> listarMovimentos(int caixaId) throws SQLException {
-        String sql = "SELECT * FROM suprimentos_retiradas WHERE caixa_id = ? ORDER BY data";
+        String sql = """
+            SELECT sr.*, u.nome as usuario_nome
+            FROM suprimentos_retiradas sr
+            JOIN usuarios u ON sr.usuario_id = u.id
+            WHERE sr.caixa_id = ?
+            ORDER BY sr.data
+            """;
         List<MovimentoCaixa> lista = new ArrayList<>();
         try (Connection conn = conexaoManager.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -214,6 +220,7 @@ public final class CaixaService {
                             rs.getBigDecimal("valor"),
                             rs.getString("motivo"),
                             rs.getInt("usuario_id"),
+                            rs.getString("usuario_nome"),
                             rs.getString("data")
                     ));
                 }
@@ -274,6 +281,7 @@ public final class CaixaService {
             BigDecimal valor,
             String motivo,
             int usuarioId,
+            String usuarioNome,
             String data
     ) {}
 }

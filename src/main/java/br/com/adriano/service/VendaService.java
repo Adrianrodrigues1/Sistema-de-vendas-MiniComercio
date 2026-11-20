@@ -29,10 +29,16 @@ public final class VendaService {
 
     private final ConexaoManager conexaoManager;
     private final ProdutoService produtoService;
+    private final CaixaService caixaService;
 
     public VendaService(ConexaoManager conexaoManager, ProdutoService produtoService) {
+        this(conexaoManager, produtoService, null);
+    }
+
+    public VendaService(ConexaoManager conexaoManager, ProdutoService produtoService, CaixaService caixaService) {
         this.conexaoManager = Objects.requireNonNull(conexaoManager);
         this.produtoService = Objects.requireNonNull(produtoService);
+        this.caixaService = caixaService;
     }
 
     /**
@@ -48,12 +54,23 @@ public final class VendaService {
     public int registrarVenda(Carrinho carrinho, Pagamento pagamento, Integer clienteId, int usuarioId) throws SQLException {
         validar(carrinho, pagamento);
 
+        // Verificar se caixa está aberto e obter caixa_id
+        int caixaId = 0;
+        if (caixaService != null) {
+            if (!caixaService.isCaixaAberto()) {
+                throw new IllegalStateException("Não é possível registrar venda: caixa está fechado");
+            }
+            CaixaService.CaixaInfo caixaAberto = caixaService.getCaixaAberto().orElseThrow(
+                    () -> new IllegalStateException("Caixa aberto não encontrado"));
+            caixaId = caixaAberto.id();
+        }
+
         String dataBrasilia = ZonedDateTime.now(ZONA_BR).format(FMT_BANCO);
         String numeroVenda = "V" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
         String sqlVenda = """
-            INSERT INTO vendas (numero, data, forma_pagamento, subtotal, desconto, total, cliente_id, usuario_id, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'FINALIZADA')
+            INSERT INTO vendas (numero, data, forma_pagamento, subtotal, desconto, total, cliente_id, usuario_id, status, caixa_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'FINALIZADA', ?)
             """;
         String sqlItem = """
             INSERT INTO itens_venda (venda_id, produto_id, quantidade, preco_unitario, preco_total)
@@ -80,6 +97,7 @@ public final class VendaService {
                     stmt.setBigDecimal(6, carrinho.total());
                     if (clienteId != null) stmt.setInt(7, clienteId); else stmt.setNull(7, Types.INTEGER);
                     stmt.setInt(8, usuarioId);
+                    stmt.setInt(9, caixaId);
                     stmt.executeUpdate();
 
                     try (ResultSet rs = stmt.getGeneratedKeys()) {

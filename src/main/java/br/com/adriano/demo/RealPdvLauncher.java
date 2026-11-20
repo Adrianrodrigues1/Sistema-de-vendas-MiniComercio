@@ -2,14 +2,14 @@ package br.com.adriano.demo;
 
 import br.com.adriano.db.ConexaoManager;
 import br.com.adriano.migration.MigrationService;
-import br.com.adriano.service.ProdutoService;
 import br.com.adriano.service.PdvGatewayReal;
+import br.com.adriano.service.ProdutoService;
 import br.com.adriano.ui.shell.Shell;
 import br.com.adriano.ui.tema.GerenciadorTema;
 import javax.swing.*;
 
 /**
- * Ponto de entrada do PDV Real (Fase 2) com SQLite.
+ * Ponto de entrada do PDV Real (Fase 4: Caixa/Relatórios) com SQLite.
  * <p>
  * Diferente do DemoLauncher, esta versão usa banco de dados real,
  * migrações automáticas e serviços de domínio completos.
@@ -26,7 +26,7 @@ public class RealPdvLauncher {
         String tipoBanco = args.length > 1 ? args[1] : "memoria";
 
         System.out.println("╔══════════════════════════════════════════════════════════════╗");
-        System.out.println("║  Mini Comércio 2.0 — Caldos da Ana (Fase 3: Produtos/Estoque)║");
+        System.out.println("║  Mini Comércio 2.0 — Caldos da Ana (Fase 4: Caixa/Relatórios)║");
         System.out.println("║  Perfil: " + String.format("%-50s", perfil) + "║");
         System.out.println("║  Banco:  " + String.format("%-50s", tipoBanco.toUpperCase()) + "║");
         System.out.println("║  Dados:  REAIS (SQLite) — Vendas são persistidas             ║");

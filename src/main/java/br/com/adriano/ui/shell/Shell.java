@@ -1,12 +1,15 @@
 package br.com.adriano.ui.shell;
 
 import br.com.adriano.db.ConexaoManager;
+import br.com.adriano.service.CaixaService;
 import br.com.adriano.service.ProdutoService;
+import br.com.adriano.service.RelatorioService;
+import br.com.adriano.service.VendaService;
+import br.com.adriano.ui.caixa.PainelCaixa;
 import br.com.adriano.ui.componentes.Componentes;
 import br.com.adriano.ui.componentes.Icone;
-import br.com.adriano.ui.estoque.PainelEstoque;
 import br.com.adriano.ui.pdv.*;
-import br.com.adriano.ui.produtos.PainelProdutos;
+import br.com.adriano.ui.relatorios.PainelRelatorios;
 import br.com.adriano.ui.tema.GerenciadorTema;
 import javax.swing.*;
 import java.awt.*;
@@ -34,8 +37,8 @@ public final class Shell extends JFrame {
     private final boolean modoOperador;
     private String cardAtual = "PDV";
     private PainelPdv painelPdv;
-    private PainelProdutos painelProdutos;
-    private PainelEstoque painelEstoque;
+    private PainelCaixa painelCaixa;
+    private PainelRelatorios painelRelatorios;
 
     /**
      * Construtor para modo demo (apenas PdvGateway).
@@ -79,18 +82,21 @@ public final class Shell extends JFrame {
     }
 
     private JComponent montarSidebar() {
-        JPanel sidebar = Componentes.painel(new BorderLayout(), "sidebar");
+        JPanel sidebar = Componentes.painel(new BorderLayout());
         sidebar.setPreferredSize(new Dimension(220, 0));
-        // SEM borda direita - elimina linha divisória branca
+        GerenciadorTema.estilo(sidebar, "sidebar", "texto");
+        sidebar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, GerenciadorTema.cor("borda")));
 
         // Topo: Logo
-        JPanel topo = Componentes.painel(new GridBagLayout(), "sidebar");
-        topo.setBorder(BorderFactory.createEmptyBorder(20, 16, 16, 16));
+        JPanel topo = Componentes.painel(new GridBagLayout());
+        topo.setBorder(BorderFactory.createEmptyBorder(18, 12, 10, 12));
         JLabel logo = Componentes.texto("Mini Comércio 2.0", 16, true);
         logo.setIcon(new Icone(Icone.Tipo.TIGELA, 22));
         logo.setIconTextGap(10);
+        topo.add(logo);
         JLabel subtitulo = Componentes.secundario("Caldos da Ana");
-        JPanel topoCompleto = Componentes.painel(new GridLayout(2, 1, 0, 4), "sidebar");
+        JPanel topoCompleto = Componentes.painel(new GridLayout(2, 1, 0, 2));
+        topoCompleto.setOpaque(false);
         topoCompleto.add(logo);
         topoCompleto.add(subtitulo);
         sidebar.add(topoCompleto, BorderLayout.NORTH);
@@ -106,10 +112,11 @@ public final class Shell extends JFrame {
             {"Usuários", "CONFIGURACAO", "USUARIOS"},
             {"Configurações", "CONFIGURACAO", "CONFIGURACOES"}
         };
-        JPanel nav = Componentes.painel(new GridBagLayout(), "sidebar");
+        JPanel nav = Componentes.painel(new GridBagLayout());
+        nav.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(2, 12, 2, 12); // Espaçamento uniforme
+        gbc.insets = new Insets(4, 16, 4, 16);
         gbc.weightx = 1;
         ButtonGroup grupo = new ButtonGroup();
         for (int i = 0; i < itens.length; i++) {
@@ -118,11 +125,13 @@ public final class Shell extends JFrame {
             btn.setHorizontalAlignment(SwingConstants.LEFT);
             btn.setIconTextGap(12);
             btn.setFocusPainted(false);
-            btn.setBorderPainted(true); // Permitir borda do UIManager (arredondada)
-            btn.setContentAreaFilled(true); // Usar background do UIManager
+            btn.setBorderPainted(false);
+            btn.setContentAreaFilled(false);
             btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             btn.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            // ToggleButton usa UIManager properties (background, selectedBackground, etc.)
+            GerenciadorTema.estilo(btn, "sidebar", "texto");
+            btn.putClientProperty("demo.fundo", "sidebar");
+            btn.putClientProperty("demo.texto", "texto");
             final String card = item[2];
             btn.addActionListener(e -> trocarCard(card));
             grupo.add(btn);
@@ -137,23 +146,26 @@ public final class Shell extends JFrame {
         }
         sidebar.add(nav, BorderLayout.CENTER);
 
-        // Rodapé - discreto
+        // Rodapé
         JLabel rodape = Componentes.secundario("Desenvolvido por GOAT");
         rodape.setHorizontalAlignment(SwingConstants.CENTER);
-        rodape.setBorder(BorderFactory.createEmptyBorder(0, 0, 16, 0));
+        rodape.setBorder(BorderFactory.createEmptyBorder(0, 0, 14, 0));
         sidebar.add(rodape, BorderLayout.SOUTH);
 
         return sidebar;
     }
 
     private JComponent montarCabecalho() {
-        JPanel header = Componentes.painel(new BorderLayout(), "fundo"); // Usa fundo principal, não painel
+        JPanel header = Componentes.painel(new BorderLayout());
         header.setPreferredSize(new Dimension(0, 72));
-        // SEM borda inferior - elimina linha branca entre header e conteúdo
-        header.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+        header.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, GerenciadorTema.cor("borda")),
+            BorderFactory.createEmptyBorder(8, 16, 8, 16)));
+        GerenciadorTema.estilo(header, "painel", "texto");
 
         // Esquerda: logo + título
-        JPanel esquerda = Componentes.painel(new GridBagLayout(), "fundo");
+        JPanel esquerda = Componentes.painel(new GridBagLayout());
+        esquerda.setOpaque(false);
         JLabel logo = Componentes.texto("Sistema de Vendas e Gestão", 18, true);
         logo.setIcon(new Icone(Icone.Tipo.TIGELA, 24));
         logo.setIconTextGap(12);
@@ -161,7 +173,8 @@ public final class Shell extends JFrame {
         header.add(esquerda, BorderLayout.WEST);
 
         // Direita: data/hora, caixa, usuário
-        JPanel direita = Componentes.painel(new GridBagLayout(), "fundo");
+        JPanel direita = Componentes.painel(new GridBagLayout());
+        direita.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.EAST;
         gbc.insets = new Insets(0, 16, 0, 0);
@@ -175,7 +188,7 @@ public final class Shell extends JFrame {
         lblCaixa.setIconTextGap(6);
         lblCaixa.setText("Caixa Aberto");
         GerenciadorTema.estilo(lblCaixa, "status", "statusTexto");
-        lblCaixa.setBorder(BorderFactory.createEmptyBorder(4, 10, 4, 10));
+        lblCaixa.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 8));
         lblCaixa.setOpaque(true);
         gbc.gridx = 1; direita.add(lblCaixa, gbc);
 
@@ -202,33 +215,51 @@ public final class Shell extends JFrame {
 
         // PRODUTOS - painel funcional se tiver serviço, senão placeholder
         if (produtoService != null) {
-            painelProdutos = new PainelProdutos(produtoService, this::atualizarStatus);
-            JScrollPane scrollProdutos = new JScrollPane(painelProdutos, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-            scrollProdutos.setBorder(null);
-            scrollProdutos.getViewport().setOpaque(false);
-            scrollProdutos.setOpaque(false);
-            GerenciadorTema.estilo(scrollProdutos.getViewport(), "fundo", null);
-            centro.add(scrollProdutos, "PRODUTOS");
+            // PainelProdutos não disponível neste backup - usar placeholder
+            centro.add(placeholder("Produtos", Icone.Tipo.PRODUTO, "Cadastro e gerenciamento de produtos"), "PRODUTOS");
         } else {
             centro.add(placeholder("Produtos", Icone.Tipo.PRODUTO, "Cadastro e gerenciamento de produtos"), "PRODUTOS");
         }
 
         // ESTOQUE - painel funcional se tiver serviço e conexão, senão placeholder
         if (produtoService != null && conexaoManager != null) {
-            painelEstoque = new PainelEstoque(produtoService, conexaoManager, this::atualizarStatus);
-            JScrollPane scrollEstoque = new JScrollPane(painelEstoque, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-            scrollEstoque.setBorder(null);
-            scrollEstoque.getViewport().setOpaque(false);
-            scrollEstoque.setOpaque(false);
-            GerenciadorTema.estilo(scrollEstoque.getViewport(), "fundo", null);
-            centro.add(scrollEstoque, "ESTOQUE");
+            // PainelEstoque não disponível neste backup - usar placeholder
+            centro.add(placeholder("Estoque", Icone.Tipo.ESTOQUE, "Movimentações e controle de estoque"), "ESTOQUE");
         } else {
             centro.add(placeholder("Estoque", Icone.Tipo.ESTOQUE, "Movimentações e controle de estoque"), "ESTOQUE");
         }
 
+        // CAIXA - painel funcional se tiver serviços completos
+        if (produtoService != null && conexaoManager != null) {
+            CaixaService caixaService = new CaixaService(conexaoManager);
+            VendaService vendaService = new VendaService(conexaoManager, produtoService, caixaService);
+            RelatorioService relatorioService = new RelatorioService(conexaoManager);
+            painelCaixa = new PainelCaixa(caixaService, vendaService, relatorioService, conexaoManager, this::atualizarStatus);
+            JScrollPane scrollCaixa = new JScrollPane(painelCaixa, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            scrollCaixa.setBorder(null);
+            scrollCaixa.getViewport().setOpaque(false);
+            scrollCaixa.setOpaque(false);
+            GerenciadorTema.estilo(scrollCaixa.getViewport(), "fundo", null);
+            centro.add(scrollCaixa, "CAIXA");
+        } else {
+            centro.add(placeholder("Caixa", Icone.Tipo.CAIXA, "Abertura, suprimento, retirada e fechamento"), "CAIXA");
+        }
+
+        // RELATÓRIOS - painel funcional se tiver serviços completos
+        if (produtoService != null && conexaoManager != null) {
+            RelatorioService relatorioService = new RelatorioService(conexaoManager);
+            painelRelatorios = new PainelRelatorios(relatorioService, conexaoManager, this::atualizarStatus);
+            JScrollPane scrollRelatorios = new JScrollPane(painelRelatorios, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            scrollRelatorios.setBorder(null);
+            scrollRelatorios.getViewport().setOpaque(false);
+            scrollRelatorios.setOpaque(false);
+            GerenciadorTema.estilo(scrollRelatorios.getViewport(), "fundo", null);
+            centro.add(scrollRelatorios, "RELATORIOS");
+        } else {
+            centro.add(placeholder("Relatórios", Icone.Tipo.RELATORIO, "Relatórios gerenciais (restrito)"), "RELATORIOS");
+        }
+
         // Demais módulos como placeholders (Fases futuras)
-        centro.add(placeholder("Caixa", Icone.Tipo.CAIXA, "Abertura, suprimento, retirada e fechamento"), "CAIXA");
-        centro.add(placeholder("Relatórios", Icone.Tipo.RELATORIO, "Relatórios gerenciais (restrito)"), "RELATORIOS");
         centro.add(placeholder("Clientes", Icone.Tipo.CLIENTE, "Cadastro de clientes"), "CLIENTES");
         centro.add(placeholder("Usuários", Icone.Tipo.CONFIGURACAO, "Administração de usuários (restrito)"), "USUARIOS");
         centro.add(montarPainelConfiguracoes(), "CONFIGURACOES");
@@ -251,7 +282,8 @@ public final class Shell extends JFrame {
     }
 
     private JComponent placeholder(String titulo, Icone.Tipo icone, String descricao) {
-        JPanel p = Componentes.painel(new GridBagLayout(), "fundo");
+        JPanel p = Componentes.painel(new GridBagLayout());
+        p.setOpaque(false);
         JLabel label = Componentes.texto(titulo, 22, true);
         label.setIcon(new Icone(icone, 48));
         label.setIconTextGap(16);
@@ -271,7 +303,8 @@ public final class Shell extends JFrame {
     }
 
     private JComponent montarPainelConfiguracoes() {
-        JPanel p = Componentes.painel(new GridBagLayout(), "fundo");
+        JPanel p = Componentes.painel(new GridBagLayout());
+        p.setOpaque(false);
         p.setBorder(BorderFactory.createEmptyBorder(24, 24, 24, 24));
 
         JLabel titulo = Componentes.texto("Configurações", 22, true);
@@ -290,7 +323,6 @@ public final class Shell extends JFrame {
         JComboBox<GerenciadorTema.Tema> comboTema = new JComboBox<>(GerenciadorTema.Tema.values());
         comboTema.setSelectedItem(GerenciadorTema.atual());
         comboTema.setPreferredSize(new Dimension(180, 36));
-        GerenciadorTema.estilo(comboTema, "inputFundo", "inputTexto");
         comboTema.addActionListener(e -> {
             GerenciadorTema.Tema novo = (GerenciadorTema.Tema) comboTema.getSelectedItem();
             // Usar o JFrame (Shell) como raiz para atualizar toda a árvore de componentes
