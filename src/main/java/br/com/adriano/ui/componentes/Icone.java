@@ -6,7 +6,7 @@ import java.awt.geom.*;
 
 /** Ícones vetoriais locais, sem imagens reais, fontes de símbolos ou dependências adicionais. */
 public final class Icone implements Icon {
-    public enum Tipo { CARRINHO, PRODUTO, ESTOQUE, CAIXA, RELATORIO, CLIENTE, CONFIGURACAO, BUSCA, CODIGO, LIXEIRA, IMAGEM, PREVIA, CHECK, X, DINHEIRO, PIX, CARTAO, TIGELA }
+    public enum Tipo { CARRINHO, PRODUTO, ESTOQUE, CAIXA, RELATORIO, CLIENTE, CONFIGURACAO, BUSCA, CODIGO, LIXEIRA, IMAGEM, PREVIA, CHECK, X, DINHEIRO, PIX, CARTAO, TIGELA, SETABAIXO, SETACIMA }
     private final Tipo tipo;
     private final int tamanho;
     public Icone(Tipo tipo, int tamanho) { this.tipo = tipo; this.tamanho = tamanho; }
@@ -37,6 +37,8 @@ public final class Icone implements Icon {
             case ESTOQUE -> { for (int i = 0; i < 3; i++) g.drawPolygon(new int[]{2, 12, 22, 12}, new int[]{6 + i * 5, 2 + i * 5, 6 + i * 5, 10 + i * 5}, 4); }
             case CAIXA -> { g.drawRoundRect(3, 10, 18, 11, 2, 2); g.drawRect(7, 3, 10, 7); line(g, 7, 16, 12, 16); g.drawOval(16, 15, 2, 2); }
             case PRODUTO -> { g.drawPolygon(new int[]{3, 12, 21, 21, 12, 3}, new int[]{6, 2, 6, 18, 22, 18}, 6); line(g, 3, 6, 12, 11); line(g, 21, 6, 12, 11); line(g, 12, 11, 12, 22); }
+            case SETABAIXO -> { line(g, 12, 3, 12, 18); line(g, 6, 12, 12, 18); line(g, 18, 12, 12, 18); }
+            case SETACIMA -> { line(g, 12, 21, 12, 6); line(g, 6, 12, 12, 6); line(g, 18, 12, 12, 6); }
         }
         g.dispose();
     }

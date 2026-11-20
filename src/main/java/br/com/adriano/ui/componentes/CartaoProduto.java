@@ -8,7 +8,7 @@ import java.util.function.IntConsumer;
 
 public final class CartaoProduto extends PainelArredondado {
     private int quantidade = 1;
-    private final JPanel seletor = Componentes.painel(new BorderLayout());
+    private final JPanel seletor = Componentes.painel(new BorderLayout(), "painel");
     private final ProdutoPdv produto;
     public CartaoProduto(ProdutoPdv produto, IntConsumer adicionar) {
         super(new BorderLayout(0, 7), "painel"); this.produto = produto;
@@ -23,13 +23,13 @@ public final class CartaoProduto extends PainelArredondado {
         imagem.getAccessibleContext().setAccessibleName("Adicionar " + produto.nome());
         GerenciadorTema.estilo(imagem, "suave", "muted");
         add(imagem, BorderLayout.NORTH);
-        JPanel dados = Componentes.painel(new GridLayout(3, 1, 0, 1));
+        JPanel dados = Componentes.painel(new GridLayout(3, 1, 0, 1), "painel");
         JLabel nome = Componentes.texto(produto.nome(), 14, true); nome.setToolTipText(produto.nome());
         dados.add(nome); dados.add(Componentes.secundario("Cód: " + produto.codigo()));
         JLabel estoque = Componentes.secundario("Estoque: " + produto.estoque());
         estoque.setIcon(new Icone(Icone.Tipo.PRODUTO, 14)); dados.add(estoque);
         add(dados, BorderLayout.CENTER);
-        JPanel rodape = Componentes.painel(new BorderLayout(2, 0));
+        JPanel rodape = Componentes.painel(new BorderLayout(2, 0), "painel");
         rodape.add(Componentes.texto(Dinheiro.formatar(produto.preco()), 13, true), BorderLayout.WEST);
         rodape.add(seletor, BorderLayout.EAST); atualizarQuantidade();
         add(rodape, BorderLayout.SOUTH);

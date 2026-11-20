@@ -2,6 +2,7 @@ package br.com.adriano.demo;
 
 import br.com.adriano.db.ConexaoManager;
 import br.com.adriano.migration.MigrationService;
+import br.com.adriano.service.ProdutoService;
 import br.com.adriano.service.PdvGatewayReal;
 import br.com.adriano.ui.shell.Shell;
 import br.com.adriano.ui.tema.GerenciadorTema;
@@ -25,7 +26,7 @@ public class RealPdvLauncher {
         String tipoBanco = args.length > 1 ? args[1] : "memoria";
 
         System.out.println("╔══════════════════════════════════════════════════════════════╗");
-        System.out.println("║  Mini Comércio 2.0 — Caldos da Ana (Fase 2: PDV Real)        ║");
+        System.out.println("║  Mini Comércio 2.0 — Caldos da Ana (Fase 3: Produtos/Estoque)║");
         System.out.println("║  Perfil: " + String.format("%-50s", perfil) + "║");
         System.out.println("║  Banco:  " + String.format("%-50s", tipoBanco.toUpperCase()) + "║");
         System.out.println("║  Dados:  REAIS (SQLite) — Vendas são persistidas             ║");
@@ -51,11 +52,14 @@ public class RealPdvLauncher {
                 int executadas = migrationService.migrar();
                 System.out.println("[INFO] Migrações executadas: " + executadas + " (versão atual: " + migrationService.obterVersaoAtual() + ")");
 
+                // Criar serviços de domínio
+                ProdutoService produtoService = new ProdutoService(conexaoManager);
+
                 // Criar gateway real
                 PdvGatewayReal gateway = new PdvGatewayReal(conexaoManager);
 
-                // Criar e mostrar shell
-                Shell shell = new Shell(gateway, modoOperador);
+                // Criar e mostrar shell com todos os serviços
+                Shell shell = new Shell(gateway, produtoService, conexaoManager, modoOperador);
                 shell.setVisible(true);
 
                 // Hook para fechar conexões ao sair

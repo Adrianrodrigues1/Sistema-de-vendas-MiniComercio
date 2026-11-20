@@ -47,12 +47,11 @@ public final class PainelPdv extends JPanel {
     }
 
     private JComponent montarTopo() {
-        JPanel topo = Componentes.painel(new BorderLayout(12, 0));
-        topo.setOpaque(false);
+        JPanel topo = Componentes.painel(new BorderLayout(12, 0), "fundo");
+        // topo.setOpaque(false); // agora usa role "fundo"
 
         // Busca
-        JPanel buscaPainel = Componentes.painel(new BorderLayout(8, 0));
-        buscaPainel.setOpaque(false);
+        JPanel buscaPainel = Componentes.painel(new BorderLayout(8, 0), "fundo");
         JLabel lblBusca = Componentes.texto("Buscar produto", 13, true);
         lblBusca.setIcon(new Icone(Icone.Tipo.BUSCA, 18));
         lblBusca.setIconTextGap(8);
@@ -60,7 +59,7 @@ public final class PainelPdv extends JPanel {
 
         txtBusca.setPreferredSize(new Dimension(300, 38));
         txtBusca.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        GerenciadorTema.estilo(txtBusca, "painel", "texto");
+        GerenciadorTema.estilo(txtBusca, "inputFundo", "inputTexto");
         txtBusca.putClientProperty("JTextField.placeholderText", "Nome ou código...");
         txtBusca.getDocument().addDocumentListener(new DocumentListener() {
             public void insertUpdate(DocumentEvent e) { filtrar(); }
@@ -72,11 +71,10 @@ public final class PainelPdv extends JPanel {
         // Categoria
         comboCategoria.setPreferredSize(new Dimension(170, 38));
         comboCategoria.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        GerenciadorTema.estilo(comboCategoria, "painel", "texto");
+        GerenciadorTema.estilo(comboCategoria, "inputFundo", "inputTexto");
         comboCategoria.addActionListener(e -> filtrar());
 
-        JPanel direitaTopo = Componentes.painel(new BorderLayout(8, 0));
-        direitaTopo.setOpaque(false);
+        JPanel direitaTopo = Componentes.painel(new BorderLayout(8, 0), "fundo");
         direitaTopo.add(Componentes.secundario("Categoria:"), BorderLayout.WEST);
         direitaTopo.add(comboCategoria, BorderLayout.CENTER);
 
@@ -86,36 +84,35 @@ public final class PainelPdv extends JPanel {
     }
 
     private JComponent montarCentro() {
-        JPanel centro = Componentes.painel(new BorderLayout());
-        centro.setOpaque(false);
+        JPanel centro = Componentes.painel(new BorderLayout(), "fundo");
         JLabel titulo = Componentes.texto("Produtos Disponíveis", 14, true);
         titulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0));
         centro.add(titulo, BorderLayout.NORTH);
 
         JScrollPane scroll = new JScrollPane(grade, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scroll.setBorder(null);
+        scroll.setBorder(BorderFactory.createEmptyBorder()); // Sem borda
         scroll.getViewport().setOpaque(false);
         scroll.setOpaque(false);
+        // Garantir que o viewport tenha a cor de fundo correta
+        GerenciadorTema.estilo(scroll.getViewport(), "fundo", null);
         centro.add(scroll, BorderLayout.CENTER);
         return centro;
     }
 
     private JComponent montarDireita() {
-        JPanel direita = Componentes.painel(new BorderLayout(0, 12));
-        direita.setOpaque(false);
+        JPanel direita = Componentes.painel(new BorderLayout(0, 12), "fundo");
         direita.setPreferredSize(new Dimension(420, 0));
         direita.setMaximumSize(new Dimension(420, Integer.MAX_VALUE));
 
         // Título carrinho
-        JPanel cabecalhoCarrinho = Componentes.painel(new BorderLayout());
-        cabecalhoCarrinho.setOpaque(false);
+        JPanel cabecalhoCarrinho = Componentes.painel(new BorderLayout(), "fundo");
         JLabel titulo = Componentes.texto("Venda em Andamento", 14, true);
         titulo.setIcon(new Icone(Icone.Tipo.CARRINHO, 20));
         titulo.setIconTextGap(8);
         cabecalhoCarrinho.add(titulo, BorderLayout.WEST);
         JButton btnLimpar = Componentes.botao("Limpar", Icone.Tipo.LIXEIRA, this::limparCarrinho);
-        Componentes.primario(btnLimpar);
-        // btnLimpar será atualizado via atualizarCarrinho
+        // Botão secundário - escuro com borda discreta (não primario)
+        GerenciadorTema.estilo(btnLimpar, "painelElevado", "texto");
         cabecalhoCarrinho.add(btnLimpar, BorderLayout.EAST);
         direita.add(cabecalhoCarrinho, BorderLayout.NORTH);
 
@@ -126,16 +123,14 @@ public final class PainelPdv extends JPanel {
         listaCarrinho.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         listaCarrinho.setBorder(null);
         JScrollPane scrollCarrinho = new JScrollPane(listaCarrinho, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollCarrinho.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(1, 0, 1, 0, GerenciadorTema.cor("borda")),
-            BorderFactory.createEmptyBorder(8, 0, 8, 0)));
+        scrollCarrinho.setBorder(BorderFactory.createEmptyBorder(8, 0, 8, 0)); // SEM bordas laterais
         scrollCarrinho.getViewport().setOpaque(false);
         scrollCarrinho.setOpaque(false);
+        GerenciadorTema.estilo(scrollCarrinho.getViewport(), "fundo", null);
         direita.add(scrollCarrinho, BorderLayout.CENTER);
 
         // Totais e ações
-        JPanel rodape = Componentes.painel(new GridBagLayout());
-        rodape.setOpaque(false);
+        JPanel rodape = Componentes.painel(new GridBagLayout(), "fundo");
         rodape.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(4, 0, 4, 0);
@@ -174,8 +169,7 @@ public final class PainelPdv extends JPanel {
 
         // Botões de pagamento
         gbc.gridy = 4; gbc.gridx = 0; gbc.gridwidth = 2; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.insets = new Insets(16, 0, 0, 0);
-        JPanel botoesPag = Componentes.painel(new GridLayout(1, 4, 8, 0));
-        botoesPag.setOpaque(false);
+        JPanel botoesPag = Componentes.painel(new GridLayout(1, 4, 8, 0), "fundo");
         for (Pagamento.Forma forma : Pagamento.Forma.values()) {
             JButton btn = new PagamentoButton(forma, () -> processarPagamento(forma));
             botoesPag.add(btn);
@@ -184,12 +178,13 @@ public final class PainelPdv extends JPanel {
 
         // Botões de ação
         gbc.gridy = 5; gbc.insets = new Insets(12, 0, 0, 0);
-        JPanel acoes = Componentes.painel(new GridLayout(1, 3, 8, 0));
-        acoes.setOpaque(false);
+        JPanel acoes = Componentes.painel(new GridLayout(1, 3, 8, 0), "fundo");
         JButton btnPrevia = Componentes.botao("Prévia", Icone.Tipo.PREVIA, () -> JOptionPane.showMessageDialog(this, "Prévia da venda (simulada)", "Prévia", JOptionPane.INFORMATION_MESSAGE));
+        GerenciadorTema.estilo(btnPrevia, "painelElevado", "texto"); // Secundário
         JButton btnCliente = Componentes.botao("Cliente (F2)", Icone.Tipo.CLIENTE, aoCliente);
+        GerenciadorTema.estilo(btnCliente, "painelElevado", "texto"); // Secundário
         JButton btnFinalizar = Componentes.botao("Finalizar (F10)", Icone.Tipo.CHECK, this::finalizarVenda);
-        Componentes.primario(btnFinalizar);
+        Componentes.primario(btnFinalizar); // Primário - bege/dourado
         btnFinalizar.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F10, 0), "finalizar");
         btnFinalizar.getActionMap().put("finalizar", new AbstractAction() {
             @Override public void actionPerformed(ActionEvent e) { finalizarVenda(); }
@@ -247,8 +242,6 @@ public final class PainelPdv extends JPanel {
         lblDesconto.setText("- " + Dinheiro.formatar(carrinho.desconto()));
         lblTotal.setText(Dinheiro.formatar(carrinho.total()));
         boolean temItens = !carrinho.vazio();
-        // btnLimpar está no cabecalhoCarrinho - acessar via getComponent
-        // atualização simples: o botão limpar será habilitado quando houver itens
     }
 
     void limparCarrinho() {
@@ -343,9 +336,9 @@ public final class PainelPdv extends JPanel {
             setFocusPainted(false);
             addActionListener(e -> acao.run());
             if (forma == Pagamento.Forma.DINHEIRO) {
-                Componentes.primario(this);
+                Componentes.primario(this); // Primário - bege/dourado
             } else {
-                GerenciadorTema.estilo(this, "painel", "texto");
+                GerenciadorTema.estilo(this, "painelElevado", "texto"); // Secundário - escuro
             }
         }
         private static Icone.Tipo iconeParaForma(Pagamento.Forma forma) {

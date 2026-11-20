@@ -24,25 +24,34 @@ public final class GerenciadorTema {
     private static Tema atual = Tema.CLARO;
 
     // Paleta baseada nos protótipos aprovados
+    // Tema CLARO (referência de layout) | Tema ESCURO (protótipo visual)
     private static final Map<String, String[]> CORES = Map.ofEntries(
-            Map.entry("fundo",         new String[]{"#FBFAFA", "#1C1B1C"}),
-            Map.entry("sidebar",       new String[]{"#F4F0F0", "#181618"}),
-            Map.entry("painel",        new String[]{"#FFFFFF", "#1F1E1F"}),
-            Map.entry("painelElevado", new String[]{"#F4F1EE", "#2A282A"}),
-            Map.entry("suave",         new String[]{"#F4F1EE", "#302D2B"}),
-            Map.entry("destaque",      new String[]{"#DFD2C7", "#BC9162"}),
-            Map.entry("primario",      new String[]{"#7F7266", "#A07549"}),
-            Map.entry("texto",         new String[]{"#28231F", "#F5F2EC"}),
-            Map.entry("muted",         new String[]{"#70685F", "#BFB6AD"}),
-            Map.entry("borda",         new String[]{"#E6E0DC", "#45403C"}),
-            Map.entry("sobreDestaque", new String[]{"#28231F", "#211B16"}),
-            Map.entry("sobrePrimario", new String[]{"#FFFFFF", "#FFFFFF"}),
-            Map.entry("status",        new String[]{"#E8F1E9", "#283D30"}),
-            Map.entry("statusTexto",   new String[]{"#256036", "#9DDAB0"}),
-            Map.entry("inputFundo",    new String[]{"#FFFFFF", "#2A282A"}),
-            Map.entry("inputTexto",    new String[]{"#28231F", "#F5F2EC"}),
-            Map.entry("hover",         new String[]{"#EDE6E0", "#3A3638"}),
-            Map.entry("pressed",       new String[]{"#DFD2C7", "#4A4240"}));
+            // Fundos - tons de grafite uniformes, sem contraste excessivo
+            Map.entry("fundo",         new String[]{"#FBFAFA", "#1C1B1C"}),       // Fundo principal
+            Map.entry("sidebar",       new String[]{"#F4F0F0", "#1C1B1C"}),       // Sidebar = mesmo fundo (sem linha divisória)
+            Map.entry("painel",        new String[]{"#FFFFFF", "#1F1E1F"}),       // Cards/painéis elevados
+            Map.entry("painelElevado", new String[]{"#F4F1EE", "#242324"}),       // Painéis levemente elevados
+            Map.entry("suave",         new String[]{"#F4F1EE", "#2A282A"}),       // Áreas suaves (placeholders, hover)
+            // Cores de destaque e ação - bege/dourado conforme protótipo
+            Map.entry("destaque",      new String[]{"#DFD2C7", "#BC9162"}),       // Item selecionado, seleção, hover forte
+            Map.entry("primario",      new String[]{"#7F7266", "#A07549"}),       // Botão primário (Finalizar), bordas foco
+            // Textos
+            Map.entry("texto",         new String[]{"#28231F", "#F5F2EC"}),       // Texto principal
+            Map.entry("muted",         new String[]{"#70685F", "#A8A098"}),       // Texto secundário/muted (mais legível no escuro)
+            // Bordas - discretas, quase invisíveis no escuro
+            Map.entry("borda",         new String[]{"#E6E0DC", "#353334"}),       // Bordas sutis (era #45403C - muito clara)
+            // Textos sobre cores de destaque/primário
+            Map.entry("sobreDestaque", new String[]{"#28231F", "#1A1819"}),       // Texto sobre destaque (escuro, diferente de fundo)
+            Map.entry("sobrePrimario", new String[]{"#FFFFFF", "#FFFFFF"}),       // Texto sobre primário (branco)
+            // Status (badge caixa)
+            Map.entry("status",        new String[]{"#E8F1E9", "#1E3A2E"}),       // Fundo badge (verde bem escuro)
+            Map.entry("statusTexto",   new String[]{"#256036", "#8FC99E"}),       // Texto badge
+            // Inputs
+            Map.entry("inputFundo",    new String[]{"#FFFFFF", "#242324"}),       // Fundo inputs (era #2A282A - muito claro)
+            Map.entry("inputTexto",    new String[]{"#28231F", "#F5F2EC"}),       // Texto inputs
+            // Estados interativos
+            Map.entry("hover",         new String[]{"#EDE6E0", "#2E2D2E"}),       // Hover sutil
+            Map.entry("pressed",       new String[]{"#DFD2C7", "#3A3839"}));      // Pressed
 
     private GerenciadorTema() { }
 
@@ -57,6 +66,7 @@ public final class GerenciadorTema {
     /**
      * Instala o LookAndFeel FlatLaf e configura TODAS as propriedades UIManager
      * necessárias para que componentes Swing padrão respeitem a paleta.
+     * Remove bordas padrão que criam linhas brancas no tema escuro.
      */
     public static void instalar(Tema tema) {
         atual = tema;
@@ -99,13 +109,15 @@ public final class GerenciadorTema {
         Color status = cor("status");
         Color statusTexto = cor("statusTexto");
 
-        // ===== Painéis e containers =====
+        // ===== Painéis e containers - SEM bordas padrão =====
         UIManager.put("Panel.background", fundo);
         UIManager.put("Panel.foreground", texto);
         UIManager.put("Viewport.background", fundo);
         UIManager.put("ScrollPane.background", fundo);
         UIManager.put("ScrollPane.viewportBackground", fundo);
         UIManager.put("ScrollPane.border", BorderFactory.createEmptyBorder());
+        // Remover borda interna do JScrollPane que cria linha branca
+        UIManager.put("ScrollPane.viewportBorder", BorderFactory.createEmptyBorder());
 
         // ===== Labels =====
         UIManager.put("Label.background", fundo);
@@ -115,12 +127,13 @@ public final class GerenciadorTema {
         // ===== Botões =====
         UIManager.put("Button.background", painel);
         UIManager.put("Button.foreground", texto);
-        UIManager.put("Button.border", new LineBorder(borda, 1, true));
+        UIManager.put("Button.border", BorderFactory.createEmptyBorder()); // Sem borda padrão
         UIManager.put("Button.focusBorder", new LineBorder(primario, 2, true));
         UIManager.put("Button.hoverBackground", hover);
         UIManager.put("Button.pressedBackground", pressed);
         UIManager.put("Button.disabledBackground", muted);
         UIManager.put("Button.disabledForeground", muted);
+        UIManager.put("Button.margin", new Insets(8, 16, 8, 16));
 
         // ===== ToggleButton (usado na sidebar) =====
         UIManager.put("ToggleButton.background", sidebar);
@@ -129,8 +142,10 @@ public final class GerenciadorTema {
         UIManager.put("ToggleButton.selectedForeground", sobreDestaque);
         UIManager.put("ToggleButton.hoverBackground", hover);
         UIManager.put("ToggleButton.pressedBackground", pressed);
-        UIManager.put("ToggleButton.border", BorderFactory.createEmptyBorder(8, 12, 8, 12));
+        UIManager.put("ToggleButton.border", BorderFactory.createEmptyBorder(10, 14, 10, 14));
         UIManager.put("ToggleButton.focusBorder", new LineBorder(primario, 2, true));
+        UIManager.put("ToggleButton.textIconGap", 12);
+        UIManager.put("ToggleButton.iconTextGap", 12);
 
         // ===== Campos de texto =====
         UIManager.put("TextField.background", inputFundo);
@@ -140,7 +155,7 @@ public final class GerenciadorTema {
         UIManager.put("TextField.selectionForeground", sobreDestaque);
         UIManager.put("TextField.border", new LineBorder(borda, 1, true));
         UIManager.put("TextField.focusBorder", new LineBorder(primario, 2, true));
-        UIManager.put("TextField.margin", new Insets(6, 10, 6, 10));
+        UIManager.put("TextField.margin", new Insets(8, 12, 8, 12));
 
         UIManager.put("PasswordField.background", inputFundo);
         UIManager.put("PasswordField.foreground", inputTexto);
@@ -167,6 +182,7 @@ public final class GerenciadorTema {
         UIManager.put("ComboBox.focusBorder", new LineBorder(primario, 2, true));
         UIManager.put("ComboBox.popupBorder", new LineBorder(borda, 1, true));
         UIManager.put("ComboBox.rendererUseListColors", true);
+        UIManager.put("ComboBox.buttonBorder", BorderFactory.createEmptyBorder());
 
         // ===== List =====
         UIManager.put("List.background", painel);
@@ -174,7 +190,8 @@ public final class GerenciadorTema {
         UIManager.put("List.selectionBackground", destaque);
         UIManager.put("List.selectionForeground", sobreDestaque);
         UIManager.put("List.focusCellHighlightBorder", new LineBorder(primario, 1, true));
-        UIManager.put("List.fixedCellHeight", 36);
+        UIManager.put("List.fixedCellHeight", 40);
+        UIManager.put("List.cellRenderer", new javax.swing.DefaultListCellRenderer());
 
         // ===== Table =====
         UIManager.put("Table.background", painel);
@@ -184,7 +201,8 @@ public final class GerenciadorTema {
         UIManager.put("Table.selectionForeground", sobreDestaque);
         UIManager.put("TableHeader.background", painelElevado);
         UIManager.put("TableHeader.foreground", texto);
-        UIManager.put("TableHeader.border", new LineBorder(borda, 1, true));
+        UIManager.put("TableHeader.border", BorderFactory.createEmptyBorder());
+        UIManager.put("Table.intercellSpacing", new Dimension(0, 0));
 
         // ===== ScrollBar =====
         UIManager.put("ScrollBar.background", fundo);
@@ -192,10 +210,13 @@ public final class GerenciadorTema {
         UIManager.put("ScrollBar.thumbHover", texto);
         UIManager.put("ScrollBar.thumbPressed", primario);
         UIManager.put("ScrollBar.track", fundo);
-        UIManager.put("ScrollBar.width", 10);
+        UIManager.put("ScrollBar.width", 8);
+        UIManager.put("ScrollBar.arc", 4);
+        UIManager.put("ScrollBar.showButtons", false);
 
         // ===== Separator =====
         UIManager.put("Separator.foreground", borda);
+        UIManager.put("Separator.thickness", 1);
 
         // ===== ProgressBar =====
         UIManager.put("ProgressBar.background", painelElevado);
@@ -236,7 +257,7 @@ public final class GerenciadorTema {
         UIManager.put("TabbedPane.hoverBackground", hover);
         UIManager.put("TabbedPane.pressedBackground", pressed);
         UIManager.put("TabbedPane.border", BorderFactory.createEmptyBorder());
-        UIManager.put("TabbedPane.contentAreaBorder", new LineBorder(borda, 1, true));
+        UIManager.put("TabbedPane.contentAreaBorder", BorderFactory.createEmptyBorder());
         UIManager.put("TabbedPane.tabAreaInsets", new Insets(0, 0, 0, 0));
         UIManager.put("TabbedPane.tabInsets", new Insets(8, 16, 8, 16));
 
@@ -261,6 +282,12 @@ public final class GerenciadorTema {
         // ===== Status (badge caixa aberto) =====
         UIManager.put("status.background", status);
         UIManager.put("status.foreground", statusTexto);
+
+        // ===== JFrame/RootPane - evitar fundo branco =====
+        UIManager.put("RootPane.background", fundo);
+        UIManager.put("InternalFrame.background", fundo);
+        UIManager.put("Desktop.background", fundo);
+        UIManager.put("DesktopIcon.background", fundo);
     }
 
     /**
@@ -270,9 +297,16 @@ public final class GerenciadorTema {
      * @param raiz  componente raiz (JFrame, JDialog, JPanel, etc.) — toda a hierarquia será atualizada
      */
     public static void trocar(Tema tema, Component raiz) {
+        // 1. Instala novo L&F e propriedades UIManager
         instalar(tema);
+
+        // 2. Atualiza UI delegates de toda a árvore
         SwingUtilities.updateComponentTreeUI(raiz);
+
+        // 3. Aplica client properties (demo.fundo, demo.texto) recursivamente
         aplicar(raiz);
+
+        // 4. Força revalidação e repaint na raiz
         if (raiz instanceof JComponent jc) {
             jc.revalidate();
             jc.repaint();
@@ -280,10 +314,12 @@ public final class GerenciadorTema {
             container.validate();
             container.repaint();
         }
-        // Forçar repaint em janelas filhas (JOptionPane, etc.)
+
+        // 5. Força repaint em janelas filhas (JOptionPane, JDialog, etc.)
         for (Window w : Window.getWindows()) {
             if (w != raiz && w.isDisplayable()) {
                 SwingUtilities.updateComponentTreeUI(w);
+                aplicar(w);
                 w.repaint();
             }
         }
@@ -303,26 +339,88 @@ public final class GerenciadorTema {
     /**
      * Percorre recursivamente a hierarquia aplicando cores aos componentes
      * que têm client properties "demo.fundo" e/ou "demo.texto".
+     * Também processa viewports de JScrollPane e células de JList/JTable.
      */
     public static void aplicar(Component componente) {
-        if (componente instanceof JComponent jc) aplicarCores(jc);
+        if (componente instanceof JComponent jc) {
+            aplicarCores(jc);
+        }
+
+        // Processar viewport de JScrollPane
+        if (componente instanceof JScrollPane scrollPane) {
+            JViewport viewport = scrollPane.getViewport();
+            if (viewport != null) {
+                aplicarCores(viewport);
+                Component view = viewport.getView();
+                if (view != null) {
+                    aplicar(view);
+                }
+            }
+        }
+
         if (componente instanceof Container container) {
             for (Component filho : container.getComponents()) {
                 aplicar(filho);
             }
         }
+
+        // Processar células de JList (renderer components não estão na hierarquia)
+        if (componente instanceof JList<?> list) {
+            list.repaint();
+        }
+
+        // Processar JTable
+        if (componente instanceof JTable table) {
+            table.repaint();
+        }
     }
 
     private static void aplicarCores(JComponent componente) {
+        // Aplicar background baseado em client property
         if (componente.getClientProperty("demo.fundo") instanceof String papel) {
             componente.setBackground(cor(papel));
         }
+
+        // Aplicar foreground baseado em client property
         if (componente.getClientProperty("demo.texto") instanceof String papel) {
             componente.setForeground(cor(papel));
+            // Forçar repaint de ícones filhos (usam foreground do componente)
+            for (Component child : componente.getComponents()) {
+                child.repaint();
+            }
         }
+
         // Para PainelArredondado, forçar repaint pois ele pinta o fundo no paintComponent
         if (componente instanceof PainelArredondado) {
             componente.repaint();
+        }
+
+        // Para botões com ícones, forçar repaint do ícone
+        if (componente instanceof AbstractButton btn) {
+            btn.repaint();
+        }
+
+        // Para labels com ícones
+        if (componente instanceof JLabel label) {
+            label.repaint();
+        }
+    }
+
+    /**
+     * Força atualização completa de um componente e seus filhos.
+     * Útil para componentes customizados que não usam client properties.
+     */
+    public static void forcarAtualizacao(Component componente) {
+        if (componente instanceof JComponent jc) {
+            // Atualizar background/foreground do próprio componente se tiver client properties
+            aplicarCores(jc);
+
+            // Recursão em filhos
+            if (componente instanceof Container container) {
+                for (Component filho : container.getComponents()) {
+                    forcarAtualizacao(filho);
+                }
+            }
         }
     }
 }

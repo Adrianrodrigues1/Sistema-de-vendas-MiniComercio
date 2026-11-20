@@ -46,7 +46,7 @@ class GerenciadorTemaTest {
         GerenciadorTema.instalar(GerenciadorTema.Tema.ESCURO);
 
         assertEquals(new Color(0x1C1B1C), GerenciadorTema.cor("fundo"));
-        assertEquals(new Color(0x181618), GerenciadorTema.cor("sidebar"));
+        assertEquals(new Color(0x1C1B1C), GerenciadorTema.cor("sidebar")); // Mesmo que fundo (sem linha divisória)
         assertEquals(new Color(0x1F1E1F), GerenciadorTema.cor("painel"));
         assertEquals(new Color(0xA07549), GerenciadorTema.cor("primario"));
         assertEquals(new Color(0xF5F2EC), GerenciadorTema.cor("texto"));

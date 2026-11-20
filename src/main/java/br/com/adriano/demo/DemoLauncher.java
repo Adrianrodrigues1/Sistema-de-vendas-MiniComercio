@@ -29,10 +29,24 @@ public class DemoLauncher {
         // Instala tema inicial antes de criar componentes
         GerenciadorTema.instalar(GerenciadorTema.Tema.CLARO);
 
-        SwingUtilities.invokeLater(() -> {
-            GatewayDemonstracao gateway = new GatewayDemonstracao();
-            Shell shell = new Shell(gateway, modoOperador);
-            shell.setVisible(true);
+        // Handler para exceções não capturadas na EDT
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            System.err.println("=== UNCAUGHT EXCEPTION on thread " + t.getName() + " ===");
+            e.printStackTrace();
         });
+
+        SwingUtilities.invokeLater(() -> {
+            try {
+                GatewayDemonstracao gateway = new GatewayDemonstracao();
+                Shell shell = new Shell(gateway, modoOperador);
+                shell.setVisible(true);
+                System.out.println("EDT: Shell visível: " + shell.isVisible());
+            } catch (Exception e) {
+                System.err.println("=== EXCEPTION IN EDT ===");
+                e.printStackTrace();
+            }
+        });
+
+        System.out.println("Main: invokeLater retornou");
     }
 }
